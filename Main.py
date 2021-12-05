@@ -1,29 +1,10 @@
-from RequestMap.EndpointMap import Map
-from RequestMap.Protocols.Flask import HTTPViaFlask
-from RequestMap.Response.JSON import JSONStandardizer
+from Global import API, app # app is required for Gunicorn.
 
-API = Map()
+import views.Authentication
+import views.Planner
+import views.Dev
 
-FlaskProtocol = HTTPViaFlask()
-API.useProtocol(FlaskProtocol)
-API.useResponseHandler(JSONStandardizer())
+# Check out views.* for more.
 
-
-@API.endpoint("webroot-post", {
-    'httpmethods': ['POST'],
-    'httproute': '/',
-})
-def webroot(makeResponse):
-    return makeResponse(0, message="Helloworld from POST")
-
-@API.endpoint("webroot-delete", {
-    'httpmethods': ['DELETE'],
-    'httproute': '/',
-})
-def webroot(makeResponse):
-    return makeResponse(0, message="Helloworld from DELETE (do different stuff)")
-
-
-app = FlaskProtocol.app
-
-app.run(port=8080)
+if __name__ == "__main__":
+    app.run(port=8080, debug=True)
