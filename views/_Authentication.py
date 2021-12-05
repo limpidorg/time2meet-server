@@ -1,3 +1,5 @@
+# Not in use at the moment
+
 from Global import API
 
 import secrets

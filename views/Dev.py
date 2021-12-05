@@ -12,6 +12,5 @@ def example(a, b, makeResponse, c=0):
     # The order of makeResponse does not matter.
     #
     # In this app, we are using RequestMap.Response.JSON.JSONStandardizer (see Global.py)
-
     return makeResponse(0, result=a + b + c)
 
