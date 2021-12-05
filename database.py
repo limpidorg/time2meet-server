@@ -5,7 +5,8 @@ from mongoengine.fields import EmailField, FloatField, ListField
 class Planner(Document):
     plannerId = StringField(required=True, unique=True)
     plannerName = StringField(required=True)
-    userIds = ListField(StringField(), default=[])
+    notBefore = FloatField(required=True)
+    notAfter = FloatField(required=True)
 
 # Not using a global user account as that will complicate things. That's a feature for the future.
 
