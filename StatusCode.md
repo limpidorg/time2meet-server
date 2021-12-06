@@ -14,6 +14,7 @@
 | -100 | No authentication method is available                                |
 | -101 | The token is invalid                                                 |
 | -102 | Either the email is invalid or it's already used by another account. |
+| -103 | The password is invalid                                                 |
 
 ## User account
 

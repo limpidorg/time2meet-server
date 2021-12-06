@@ -28,3 +28,33 @@ def getUser(userId, makeResponse):
             json.loads(user.to_json()))
         return makeResponse(0, user=userDict)
     return makeResponse(-200)
+
+
+@API.endpoint('edit-user', {
+    'httpmethods': ['PATCH'],
+    'httproute': '/user',
+    'authlevel': 'verify-token'
+}, userId=str, properties=json.loads)
+def editUser(userId, properties, makeResponse):
+    user = core.user.getUser(userId)
+    if user:
+        if core.user.editUser(userId, properties):
+            # Return updated user
+            user = core.user.getUser(userId)
+            return makeResponse(0, user=security.desensitizer.desensitizeUser(json.loads(user.to_json())))
+        else:
+            return makeResponse(-1)
+    return makeResponse(-200)
+
+
+@API.endpoint('delete-user', {
+    'httpmethods': ['DELETE'],
+    'httproute': '/user',
+    'authlevel': 'verify-password'
+}, userId=str)
+def deleteUser(userId, makeResponse):
+    if core.user.getUser(userId):
+        if core.user.deleteUser(userId):
+            return makeResponse(0)
+        return makeResponse(-1)
+    return makeResponse(-200)
