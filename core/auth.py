@@ -5,3 +5,7 @@ import secrets
 def verifyToken(userId, token):
     # TODO
     return True
+
+def verifyPassword(userId, password):
+    # TODO
+    return True
