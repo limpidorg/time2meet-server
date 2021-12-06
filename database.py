@@ -9,28 +9,34 @@ class PlannerPermission(Document):
     plannerId = StringField(required=True)
     permissions = ListField(StringField(), default=[], required=True)
 
+
 class Planner(Document):
     plannerId = StringField(required=True, unique=True)
     plannerName = StringField(required=True)
     notBefore = FloatField(required=True)
     notAfter = FloatField(required=True)
     # Default permission for all users. For an individual user, use PlannerPermission
-    permissions = ListField(StringField(), default=[], required=True)
+    permissions = ListField(StringField(), default=[])
+
 
 class Token(EmbeddedDocument):
     token = StringField(required=True)
     expires = FloatField(required=True)
     scopes = ListField(StringField(), default=[], required=True)
-    
+
+
 class User(Document):
     userId = StringField(required=True, unique=True)
     userName = StringField(required=True)
-    email = EmailField()
-    password = StringField()
-    salt = StringField()
+    email = EmailField(required=True, unique=True)
+    registerationTime = FloatField(required=True)
+    password = StringField(required=True)
+    salt = StringField(required=True)
     # The user's time shift relative to GMT
-    timeShift = FloatField(required=True)
+    timeShift = FloatField(default=0)
     tokens = EmbeddedDocumentListField(Token)
+    status = StringField(default='require-email-verification')
+
 
 class TimePreference(Document):
     userId = StringField(required=True)

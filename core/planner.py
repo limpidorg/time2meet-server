@@ -18,8 +18,11 @@ def editPlanner(plannerId, properties):
     if planner:
         for key in properties:
             setattr(planner, key, properties[key])
-        planner.save()
-        return True
+        try:
+            planner.save()
+            return True
+        except:
+            return False
     return False
 
 def deletePlanner(plannerId):
