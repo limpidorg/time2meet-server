@@ -33,4 +33,34 @@ def login(email, makeResponse, maxAge=86400 * 7, scopes=[]):
     userInfo = security.desensitizer.desensitizeUser(
         json.loads(user.to_json()))
 
-    return makeResponse(0, f'The token has been generated which expires in {str(maxAge)} seconds. Please persist the token for future use.', token=token, user=userInfo, userId=userId, scopes=scopes)
+    return makeResponse(0, f'The token has been generated which expires in {str(maxAge)} seconds. Please persist the token for future use.', token=token, user=userInfo, userId=userId, scopes=scopes, maxAge=maxAge)
+
+
+@API.endpoint('logout', {
+    'httpmethods': ['POST'],
+    'httproute': '/logout',
+    'authlevel': 'verify-token'
+})
+@API.endpoint('invalidate-token', {
+    'httpmethods': ['DELETE'],
+    'httproute': '/token',
+    'authlevel': 'verify-token'
+})
+def logout(userId, token, makeResponse):
+    if core.auth.deleteToken(userId, token):
+        return makeResponse(0, 'Token has been invalidated.')
+    else:
+        return makeResponse(-1, 'Token could not be invalidated.')
+
+
+@API.endpoint('get-token-info', {
+    'httpmethods': ['GET'],
+    'httproute': '/token',
+    'authlevel': 'verify-token'
+})
+def getTokenInfo(userId, token, makeResponse):
+    tokenInfo = core.auth.getToken(userId, token)
+    if not tokenInfo:
+        raise Exception("Impossible case!")
+    else:
+        return makeResponse(0, token=security.desensitizer.desensitizeTokenInfo(json.loads(tokenInfo.to_json())))

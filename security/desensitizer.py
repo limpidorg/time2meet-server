@@ -28,3 +28,17 @@ def desensitizePlanner(plannerDict: dict, desensitizeFor: str = 'user') -> dict:
         if protectedProperty in plannerDict:
             del plannerDict[protectedProperty]
     return plannerDict
+
+
+def desensitizeTokenInfo(tokenInfoDict: dict, desensitizeFor: str = 'user') -> dict:
+    protectedPropertiesLists = {
+        'user': []
+    }
+    protectedProperties = protectedPropertiesLists.get(desensitizeFor, [])
+    # Remove useless _id
+    del tokenInfoDict['_id']
+    # Desensitize the tokenInfo object
+    for protectedProperty in protectedProperties:
+        if protectedProperty in tokenInfoDict:
+            del tokenInfoDict[protectedProperty]
+    return tokenInfoDict

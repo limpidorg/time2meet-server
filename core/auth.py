@@ -74,3 +74,30 @@ def generateToken(userId, maxAge=86400 * 7, scopes=[]) -> str:
             raise
             return None
     return None
+
+
+def getToken(uID, token) -> dict:
+    user = core.user.getUser(uID)
+    if user:
+        _cleanExpiredTokens(user)
+        for t in user.tokens:
+            if t.token == token and t.expires > time.time():
+                return t
+        return None
+    return None
+
+
+def deleteToken(uID, token):
+    user = core.user.getUser(uID)
+    if user:
+        _cleanExpiredTokens(user)
+        for t in user.tokens:
+            if t.token == token:
+                user.tokens.remove(t)
+                try:
+                    user.save()
+                    return True
+                except Exception as e:
+                    return False
+        return False
+    return False
