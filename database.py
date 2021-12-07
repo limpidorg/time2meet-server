@@ -17,6 +17,8 @@ class Planner(Document):
     notAfter = FloatField(required=True)
     # Default permission for all users. For an individual user, use PlannerPermission
     permissions = ListField(StringField(), default=[])
+    createdBy = StringField(required=True)
+    creationTime = FloatField(required=True)
 
 
 class Token(EmbeddedDocument):

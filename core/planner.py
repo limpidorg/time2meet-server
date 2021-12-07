@@ -1,11 +1,11 @@
 from database import Planner
 import secrets
+import time
 
-
-def newPlanner(plannerName, notBefore, notAfter):
+def newPlanner(plannerName, notBefore, notAfter, createdBy):
     plannerId = secrets.token_hex(8)
     planner = Planner(plannerId=plannerId, plannerName=plannerName,
-                      notBefore=notBefore, notAfter=notAfter)
+                      notBefore=notBefore, notAfter=notAfter, createdBy=createdBy, creationTime=time.time())
     planner.save()
     return plannerId
 
@@ -15,6 +15,11 @@ def getPlanner(plannerId):
 
 def editPlanner(plannerId, properties):
     planner = getPlanner(plannerId)
+    protectedProperties = ['createdBy', 'creationTime']
+    for property in protectedProperties:
+        if property in properties:
+            return False
+
     if planner:
         for key in properties:
             setattr(planner, key, properties[key])

@@ -9,13 +9,13 @@ import security.desensitizer
     'httpmethods': ['POST'],
     'httproute': '/planner',
 }, notBefore=float, notAfter=float)
-def newPlanner(makeResponse, plannerName, notBefore=None, notAfter=None):
+def newPlanner(makeResponse, plannerName, userId, notBefore=None, notAfter=None):
     if not notBefore:
         notBefore = time.time()
     if not notAfter:
         notAfter = time.time() + 3600*24*7
     plannerId = core.planner.newPlanner(
-        plannerName=plannerName, notBefore=notBefore, notAfter=notAfter)
+        plannerName=plannerName, notBefore=notBefore, notAfter=notAfter, createdBy=userId)
     return makeResponse(0, plannerId=plannerId)
 
 
