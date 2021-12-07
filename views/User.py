@@ -21,11 +21,17 @@ def createUser(userName, email, password, makeResponse, timeShift=0):
     'httproute': '/user',
     'authlevel': 'verify-token'
 })
-def getUser(userId, makeResponse):
-    user = core.user.getUser(userId)
+def getUser(userId, makeResponse, targetUserId=None):
+    if targetUserId:
+        desensitizeFor = 'user'
+    else:
+        desensitizeFor = 'owner'
+        targetUserId = userId
+
+    user = core.user.getUser(targetUserId)
     if user:
         userDict = security.desensitizer.desensitizeUser(
-            json.loads(user.to_json()))
+            json.loads(user.to_json()), desensitizeFor=desensitizeFor)
         return makeResponse(0, user=userDict)
     return makeResponse(-200)
 

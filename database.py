@@ -22,7 +22,7 @@ class Planner(Document):
 class Token(EmbeddedDocument):
     token = StringField(required=True)
     expires = FloatField(required=True)
-    scopes = ListField(StringField(), default=[], required=True)
+    scopes = ListField(StringField(), default=[])
 
 
 class User(Document):

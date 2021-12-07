@@ -61,3 +61,13 @@ def deleteUser(userId: str):
         return True
     except:
         return False
+
+
+def getUserByEmail(email: str):
+    return User.objects(email=email).first()
+
+def getUserIdByEmail(email: str):
+    user = getUserByEmail(email)
+    if not user:
+        return None
+    return user.userId

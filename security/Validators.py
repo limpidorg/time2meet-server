@@ -9,16 +9,24 @@ class AuthenticationValidator(StandardValidator):
         self.AUTHENTICATION_METHODS = {
             'verify-token': self.verifyToken,
             'verify-password': self.verifyPassword,
+            'login': self.login,
             'public': lambda: None  # No authentication required
         }
 
     def verifyToken(self, userId, token):
-        if not core.auth.verifyToken(userId, token):
-            raise ValidationError(-101)
+        authResult = core.auth.verifyToken(userId, token)
+        if not authResult.succeeded:
+            raise ValidationError(authResult.code, authResult.message)
 
     def verifyPassword(self, userId, password):
-        if not core.auth.verifyPassword(userId, password):
-            raise ValidationError(-103)
+        authResult = core.auth.verifyPassword(userId, password)
+        if not authResult.succeeded:
+            raise ValidationError(authResult.code, authResult.message)
+
+    def login(self, email, password):
+        authResult = core.auth.login(email, password)
+        if not authResult.succeeded:
+            raise ValidationError(authResult.code, authResult.message)
 
     def noAuthenticationMethodIsAvailable(self):
         raise ValidationError(-100)  # No authentication method is available
