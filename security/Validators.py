@@ -23,7 +23,7 @@ class AuthenticationValidator(StandardValidator):
     def noAuthenticationMethodIsAvailable(self):
         raise ValidationError(-100)  # No authentication method is available
 
-    def getEvaluationMethod(self, endpoint):
+    def getEvaluationMethod(self, endpoint, protocolName):
         if 'authlevel' in endpoint['metadata']:
             authLevel = endpoint['metadata']['authlevel']
         else:
