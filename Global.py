@@ -19,6 +19,7 @@ JSONStandardizerInstance = JSONStandardizer(standardMessages={
     -101: "The token is invalid",
     -102: "Either the email is invalid or it's already used by another account.",
     -103: "The password is invalid",
+    -104: "Access is denied. An elevated permission is required.",
     -200: "User does not exist",
 })
 
@@ -27,7 +28,7 @@ API.useResponseHandler(JSONStandardizerInstance)
 
 # The validator is not ready to go; it will always return True.
 # For more information about this validator, go to security > Validators
-# 
+#
 # Brief explanation of how it works:
 # - The validator (AuthenticationValidator()) will read the metadata of the endpoint and return the corresponding evaluationFunction.
 # - RequestMap will then inspect the evaluationFunction and get its required and optional parameters.

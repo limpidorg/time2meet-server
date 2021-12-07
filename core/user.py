@@ -26,17 +26,18 @@ def createUser(userName: str, email: str, password: str, timeShift: float = 0) -
         return None
 
 
-def editUser(userId: str, properties: dict):
+def editUser(userId: str, properties: dict, protectProperties = True):
     protectedProperties = ['userId', 'status',
-                           'tokens', 'salt', 'registerationTime']
+                           'tokens', 'salt', 'registerationTime', 'password']
     user = getUser(userId)
     if not user:
         return False
 
-    # Protect those properties
-    for key in protectedProperties:
-        if key in properties:
-            return False
+    if protectProperties:
+        # Protect those properties
+        for key in protectedProperties:
+            if key in properties:
+                return False
 
     # Update status if email is in properties
     if 'email' in properties:

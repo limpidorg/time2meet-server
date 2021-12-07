@@ -1,4 +1,6 @@
+import hashlib
 from Global import API
+from RequestMap.Exceptions import ValidationError
 import core.user
 import security.desensitizer
 import json
@@ -43,8 +45,30 @@ def getUser(userId, makeResponse, targetUserId=None):
 }, userId=str, properties=json.loads)
 def editUser(userId, properties, makeResponse):
     user = core.user.getUser(userId)
+    if 'password' in properties:
+        return makeResponse(-104, 'Due to security reasons, you can only update password using the PATCH /password endpoint which requires password authentication.')
+
     if user:
         if core.user.editUser(userId, properties):
+            # Return updated user
+            user = core.user.getUser(userId)
+            return makeResponse(0, user=security.desensitizer.desensitizeUser(json.loads(user.to_json())))
+        else:
+            return makeResponse(-1)
+    return makeResponse(-200)
+
+
+@API.endpoint('update-password', {
+    'httpmethods': ['PATCH'],
+    'httproute': '/password',
+    'authlevel': 'verify-password'
+}, userId=str, password=str)
+def updatePassword(userId, password, makeResponse):
+    user = core.user.getUser(userId)
+    if user:
+        passwordHash = hashlib.sha256(
+            str(password + user.salt).encode('utf-8')).hexdigest()
+        if core.user.editUser(userId, properties={'password': passwordHash}, protectProperties=False):
             # Return updated user
             user = core.user.getUser(userId)
             return makeResponse(0, user=security.desensitizer.desensitizeUser(json.loads(user.to_json())))
