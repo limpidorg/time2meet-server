@@ -41,6 +41,7 @@ class User(Document):
 
 
 class TimePreference(Document):
+    slotId = StringField(required=True, unique=True)
     userId = StringField(required=True)
     plannerId = StringField(required=True)
     notBefore = FloatField(required=True)
