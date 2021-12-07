@@ -11,6 +11,11 @@ from RequestMap.Exceptions import ValidationError
     'httproute': '/login',
     'authlevel': 'login'
 }, maxAge=float, scopes=json.loads)
+@API.endpoint('new-token', {
+    'httpmethods': ['POST'],
+    'httproute': '/token',
+    'authlevel': 'login'
+}, maxAge=float, scopes=json.loads)
 def login(email, makeResponse, maxAge=86400 * 7, scopes=[]):
     # Note: This endpoint will only be called if the password is correct.
     # The password auth is done in the security.Validators (which uses core.auth.verifyPassword)
@@ -28,4 +33,4 @@ def login(email, makeResponse, maxAge=86400 * 7, scopes=[]):
     userInfo = security.desensitizer.desensitizeUser(
         json.loads(user.to_json()))
 
-    return makeResponse(0, token=token, user=userInfo, userId=userId, scopes=scopes)
+    return makeResponse(0, f'The token has been generated which expires in {str(maxAge)} seconds. Please persist the token for future use.', token=token, user=userInfo, userId=userId, scopes=scopes)
