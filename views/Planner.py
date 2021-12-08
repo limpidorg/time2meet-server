@@ -1,5 +1,6 @@
 from Global import API
 import core.planner
+import core.auth
 import time
 import json
 import security.desensitizer
@@ -9,8 +10,11 @@ import security.desensitizer
     'httpmethods': ['POST'],
     'httproute': '/planner',
     'authlevel': 'verify-token'
-}, notBefore=float, notAfter=float)
-def newPlanner(makeResponse, plannerName, userId, notBefore=None, notAfter=None):
+}, notBefore=float, notAfter=float, permissions=json.loads)
+def newPlanner(makeResponse, plannerName, userId, notBefore=None, notAfter=None, permissions=[]):
+    if not isinstance(permissions, list):
+        return makeResponse(-1, 'Permissions must be a JSON list')
+
     if not notBefore:
         notBefore = time.time()
     if not notAfter:
@@ -60,3 +64,21 @@ def deletePlanner(makeResponse, plannerId):
     if result:
         return makeResponse(0, message='Planner deleted')
     return makeResponse(-1, message='Could not delete')
+
+
+@API.endpoint('update-user-planner-permissions', {
+    'httpmethods': ['PATCH','POST'],
+    'httproute': '/user-permissions',
+    'authlevel': 'verify-token',
+    'plannerpermission': 'write'
+}, permissions=json.loads)
+def updateUserPermissions(makeResponse, userId, plannerId, permissions, targetUserId = None):
+    if not targetUserId:
+        targetUserId = userId
+    if not isinstance(permissions, list):
+        return makeResponse(-1, message='Permissions must be a JSON list represented in string')
+    result = core.auth.updateUserPlannerPermissions(
+        userId=targetUserId, plannerId=plannerId, permissions=permissions)
+    if result:
+        return makeResponse(0, message='Permissions updated', permissions=permissions)
+    return makeResponse(-1, message='Failed to update permissions.')

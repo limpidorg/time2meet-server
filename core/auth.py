@@ -81,6 +81,33 @@ def plannerPermission(permission, plannerId, userId=None):
     return AuthResult(False, -105, message=f"Access is denied: userId of {str(userId) if userId else '<PUBLIC>'} do not have the {permission} permission to access the requested resource.")
 
 
+def updateUserPlannerPermissions(userId, plannerId, permissions=[]):
+    if not core.planner.getPlanner(plannerId):
+        return False
+    if not core.user.getUser(userId):
+        return False
+
+    plannerPermission = getUserPlannerPermission(userId, plannerId)
+    if plannerPermission:
+        if permissions == []:
+            plannerPermission.delete()
+            return True
+        plannerPermission.permissions = permissions
+        try:
+            plannerPermission.save()
+            return True
+        except:
+            return False
+    else:
+        plannerPermission = PlannerPermission(
+            userId=userId, plannerId=plannerId, permissions=permissions)
+        try:
+            plannerPermission.save()
+            return True
+        except:
+            return False
+
+
 def login(email, password) -> AuthResult:
     userId = core.user.getUserIdByEmail(email)
     if userId:

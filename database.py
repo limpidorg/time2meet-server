@@ -7,7 +7,7 @@ from mongoengine.fields import EmailField, EmbeddedDocumentListField, FloatField
 class PlannerPermission(Document):
     userId = StringField(required=True, unique=True)
     plannerId = StringField(required=True)
-    permissions = ListField(StringField(), default=[], required=True)
+    permissions = ListField(StringField(), default=[])
 
 class Planner(Document):
     plannerId = StringField(required=True, unique=True)
