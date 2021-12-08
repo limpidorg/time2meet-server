@@ -44,9 +44,11 @@ def endpointInfo(makeResponse, path=None, identifier=None):
             return object
         elif isinstance(object, bool):
             return object
+        elif object == None:
+            return object
         else:
             return str(object)
-    
+
     endpoints = {}
     if identifier:
         if identifier in API.endpointMap:
