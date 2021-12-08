@@ -8,6 +8,7 @@ import security.desensitizer
 @API.endpoint('new-planner', {
     'httpmethods': ['POST'],
     'httproute': '/planner',
+    'authlevel': 'verify-token'
 }, notBefore=float, notAfter=float)
 def newPlanner(makeResponse, plannerName, userId, notBefore=None, notAfter=None):
     if not notBefore:
@@ -22,6 +23,8 @@ def newPlanner(makeResponse, plannerName, userId, notBefore=None, notAfter=None)
 @API.endpoint('get-planner', {
     'httpmethods': ['GET'],
     'httproute': '/planner',
+    'authlevel': 'verify-token',
+    'plannerpermission': 'read'
 })
 def getPlanner(makeResponse, plannerId):
     plannerObj = core.planner.getPlanner(plannerId)
@@ -34,7 +37,9 @@ def getPlanner(makeResponse, plannerId):
 
 @API.endpoint('edit-planner', {
     'httpmethods': ['PATCH'],
-    'httproute': '/planner'
+    'httproute': '/planner',
+    'authlevel': 'verify-token',
+    'plannerpermission': 'write'
 }, properties=json.loads)
 def editPlanner(makeResponse, plannerId, properties):
     result = core.planner.editPlanner(plannerId, properties)
@@ -46,7 +51,9 @@ def editPlanner(makeResponse, plannerId, properties):
 
 @API.endpoint('delete-planner', {
     'httpmethods': ['DELETE'],
-    'httproute': '/planner'
+    'httproute': '/planner',
+    'authlevel': 'verify-token',
+    'plannerpermission': 'delete'
 })
 def deletePlanner(makeResponse, plannerId):
     result = core.planner.deletePlanner(plannerId)

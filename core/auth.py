@@ -1,5 +1,6 @@
-from database import User, Token
+from database import User, Token, PlannerPermission
 import core.user
+import core.planner
 import time
 import secrets
 import hashlib
@@ -52,6 +53,32 @@ def verifyPassword(userId, password):
             return AuthResult(True, 0, userId)
         return AuthResult(False, -103)
     return AuthResult(False, -200)
+
+
+def getUserPlannerPermission(userId, plannerId):
+    return PlannerPermission.objects(userId=userId, plannerId=plannerId).first()
+
+
+def plannerPermission(permission, plannerId, userId=None):
+    planner = core.planner.getPlanner(plannerId)
+    if planner:
+        # Checks for planner public permissions.
+        if permission in planner.permissions:
+            return AuthResult(True, 0)
+        # Checks if the user is the creator
+        if planner.createdBy == userId:
+            return AuthResult(True, 0)
+    else:
+        return AuthResult(False, -300)
+
+    # Checks for planner private permissions.
+    if userId:
+        plannerPermission = getUserPlannerPermission(userId, plannerId)
+        if plannerPermission:
+            if permission in plannerPermission.permissions:
+                return AuthResult(True, 0)  # User-specific permission
+
+    return AuthResult(False, -105, message=f"Access is denied: userId of {str(userId) if userId else '<PUBLIC>'} do not have the {permission} permission to access the requested resource.")
 
 
 def login(email, password) -> AuthResult:

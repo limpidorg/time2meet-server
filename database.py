@@ -9,7 +9,6 @@ class PlannerPermission(Document):
     plannerId = StringField(required=True)
     permissions = ListField(StringField(), default=[], required=True)
 
-
 class Planner(Document):
     plannerId = StringField(required=True, unique=True)
     plannerName = StringField(required=True)
@@ -19,7 +18,6 @@ class Planner(Document):
     permissions = ListField(StringField(), default=[])
     createdBy = StringField(required=True)
     creationTime = FloatField(required=True)
-
 
 class Token(EmbeddedDocument):
     token = StringField(required=True)

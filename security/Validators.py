@@ -1,5 +1,6 @@
 from RequestMap.Validators.ValidatorBase import StandardValidator, ValidationError
 import core.auth
+import core.planner
 import logging
 
 
@@ -43,3 +44,28 @@ class AuthenticationValidator(StandardValidator):
             return self.AUTHENTICATION_METHODS[authLevel]
         else:
             return self.noAuthenticationMethodIsAvailable
+
+
+class PlannerPermissionValidator(StandardValidator):
+    def __init__(self):
+        super().__init__()
+        self.PERMISSION_METHODS = {
+            'public': lambda: None  # No authentication required
+        }
+
+    def generateEvaluationMethod(self, permission):
+        def evaluate(plannerId, userId=None):
+            authResult = core.auth.plannerPermission(
+                permission, userId=userId, plannerId=plannerId)
+            if not authResult.succeeded:
+                raise ValidationError(authResult.code, authResult.message)
+
+        if permission == 'public':
+            return lambda: None
+        else:
+            return evaluate
+
+    def getEvaluationMethod(self, endpoint, protocolName):
+        if 'plannerpermission' in endpoint['metadata']:
+            return self.generateEvaluationMethod(endpoint['metadata']['plannerpermission'])
+        return lambda: None
