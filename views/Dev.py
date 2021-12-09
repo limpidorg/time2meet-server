@@ -6,7 +6,7 @@ import json
 @API.endpoint("example-addition", {  # Endpoint Identifier
     'httpmethods': ['GET'],  # Metadata for the Flask protocol handler
     'httproute': '/addition',
-    'authlevel': 'verify-password'
+    'authlevel': 'public'
 }, a=float, b=float, c=float)  # Type conversion functions for parameters
 def example(a, b, makeResponse, c=0):
     # Both a and b are neccessary but c is optional - it has a default value of 0.
