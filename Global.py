@@ -1,8 +1,9 @@
 from RequestMap.EndpointMap import Map
-from RequestMap.Protocols.Flask import HTTPViaFlask
+from RequestMap.Protocols.Flask import HTTPViaFlask, HTTPBatchRequestViaFlask
 from RequestMap.Response.JSON import JSONStandardizer
 from security.Validators import AuthenticationValidator, PlannerPermissionValidator
 from mongoengine import connect
+from flask import Flask
 import logging
 
 logging.info("Initializing App...")
@@ -11,7 +12,12 @@ API = Map()
 
 logging.info("Initialising RequestMap...")
 
-FlaskProtocolInstance = HTTPViaFlask()
+FlaskApp = Flask(__name__)
+FlaskProtocolInstance = HTTPViaFlask(FlaskApp)
+FlaskBatchProtocolInstance = HTTPBatchRequestViaFlask(FlaskApp, route="/batch")
+API.useProtocol(FlaskProtocolInstance)
+API.useProtocol(FlaskBatchProtocolInstance)
+
 JSONStandardizerInstance = JSONStandardizer(standardMessages={
     0: "Success",
     -1: "Could not complete the request.",
@@ -25,7 +31,6 @@ JSONStandardizerInstance = JSONStandardizer(standardMessages={
     -300: "Planner does not exist"
 })
 
-API.useProtocol(FlaskProtocolInstance)
 API.useResponseHandler(JSONStandardizerInstance)
 
 # The validator is not ready to go; it will always return True.
