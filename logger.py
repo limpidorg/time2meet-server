@@ -111,6 +111,3 @@ with open('secrets.json', 'r') as f:
         ERROR_HOOK = secrets['errorhook']
     else:
         warning('No errorhook found in secrets.json')
-
-log("test")
-error("test")
