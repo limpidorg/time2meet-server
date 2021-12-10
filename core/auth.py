@@ -174,7 +174,7 @@ def getTokenInfo(userId, token) -> dict:
     logger.debug(f"Getting token info for user {userId} and token {token}")
     user = core.user.getUser(userId)
     if user:
-        _cleanExpiredTokens(userId)
+        _cleanExpiredTokens(user)
         for t in user.tokens:
             if t.token == token and t.expires > time.time():
                 logger.info(f"Got token info. token={token}, user={userId}.")

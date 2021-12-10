@@ -43,7 +43,8 @@ def send_discord_msg(messageType, *args, **kw):
     }
     HOOK = DISCORD_WEBHOOK_URL
     if messageType in ['error', 'fatal']:
-        HOOK = ERROR_HOOK
+        if ERROR_HOOK:
+            HOOK = ERROR_HOOK
 
     r = requests.post(HOOK,
                       data=json.dumps({
@@ -106,7 +107,10 @@ with open('secrets.json', 'r') as f:
         DISCORD_WEBHOOK_URL = secrets['webhook']
     else:
         warning('No webhook found in secrets.json')
-    if 'error_hook' in secrets:
+    if 'errorhook' in secrets:
         ERROR_HOOK = secrets['errorhook']
     else:
         warning('No errorhook found in secrets.json')
+
+log("test")
+error("test")
