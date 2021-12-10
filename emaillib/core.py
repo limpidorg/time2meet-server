@@ -15,7 +15,7 @@ except Exception as e:
     raise PermissionError("Could not read the API key.", e)
 
 
-def sendEmail(template: EmailTemplate, email: str, subject: str, fromName = 'Time2Meet Team', fromEmail = 'noreply@yyjlincoln.com', templateOptions: dict = {}, **options) -> bool:
+def sendEmail(template: EmailTemplate, email: str, subject: str, fromName = 'Time2Meet Team', fromEmail = 'noreply@yyjlincoln.app', templateOptions: dict = {}, **options) -> bool:
     if APIKEY:
         message = Mail(
             from_email=f'{fromName} <{fromEmail}>',

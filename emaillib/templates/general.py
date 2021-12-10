@@ -548,7 +548,7 @@ class OTPEmail(EmailTemplate):
 
                                           If you didn't request for a verification code, please ignore this email. You account remains secure.
 
-                                          If you have any concerns, please contact us at <a href="mailto:lincoln@yyjlincoln.com">lincoln@yyjlincoln.com</a>
+                                          If you have any concerns, please contact us at <a href="mailto:time2meet.support@yyjlincoln.app">time2meet.support@yyjlincoln.app</a>
 
                                           Thanks again for your continued support.
 
