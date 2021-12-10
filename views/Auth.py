@@ -105,7 +105,7 @@ def verifyEmail(userId, otp, makeResponse):
 
 @API.endpoint('reset-password', {
     'httpmethods': ['GET'],
-    'httproute': '/reset-password',
+    'httproute': '/password',
     'authlevel': 'public'
 }, otp=str)
 def resetPassword(userId, makeResponse):
@@ -116,7 +116,7 @@ def resetPassword(userId, makeResponse):
 
 @API.endpoint('verify-reset-password', {
     'httpmethods': ['POST'],
-    'httproute': '/reset-password',
+    'httproute': '/password',
     'authlevel': 'public'
 }, otp=str, password=str)
 def verifyResetPassword(userId, otp, newPassword, makeResponse):
