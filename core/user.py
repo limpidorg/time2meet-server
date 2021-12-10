@@ -1,4 +1,4 @@
-import logging
+import logger
 from database import User
 import secrets
 import hashlib

@@ -1,5 +1,4 @@
 from Global import API, app # app is required for Gunicorn.
-
 import views.Planner
 import views.Dev
 import views.User

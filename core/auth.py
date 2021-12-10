@@ -1,4 +1,4 @@
-import logging
+import logger
 from database import User, Token, PlannerPermission, OTP
 import core.user
 import core.planner
@@ -29,17 +29,23 @@ def verifyToken(userId, token) -> AuthResult:
         # Note: This function is not technically a part of verifyToken.
         # It does not improve the security etc - it simply cleans up the database.
         _cleanExpiredTokens(user)
+        logger.debug(f"Verifying token {token} of user {userId}.")
         for t in user.tokens:
             if t.token == token and t.expires > time.time():
+                logger.debug(f"Token {token} of user {userId} is valid.")
                 return AuthResult(True, 0, userId, t.scopes)
+        logger.debug(f"Token {token} of user {userId} is invalid.")
         return AuthResult(False, -101)
+    logger.debug(f"User {userId} is not found.")
     return AuthResult(False, -200)
 
 
 def _cleanExpiredTokens(user):
+    logger.debug(f"Cleaning up expired tokens for user {user.userId}")
     for t in user.tokens:
         if t.expires <= time.time():
             user.tokens.remove(t)
+            logger.debug(f"Removed expired token {t.token}")
     try:
         user.save()
     except:
@@ -53,14 +59,18 @@ def _cleanExpiredOTP():
 
 
 def verifyPassword(userId, password):
+    logger.debug(f"Verifying password for user {userId}.")
     user = core.user.getUser(userId)
     if user:
         salt = user.salt
         passwordHash = hashlib.sha256(
             str(password + salt).encode('utf-8')).hexdigest()
         if user.password == passwordHash:
+            logger.debug(f"Password for user {userId} is valid.")
             return AuthResult(True, 0, userId)
+        logger.debug(f"Password for user {userId} is invalid.")
         return AuthResult(False, -103)
+    logger.debug(f"User {userId} is not found.")
     return AuthResult(False, -200)
 
 
@@ -71,22 +81,28 @@ def getUserPlannerPermission(userId, plannerId):
 def plannerPermission(permission, plannerId, userId=None):
     planner = core.planner.getPlanner(plannerId)
     if planner:
+        logger.debug(f"Checking permission {permission} for planner {plannerId}")
         # Checks for planner public permissions.
         if permission in planner.permissions:
+            logger.debug(f"Permission {permission} is available to the public.")
             return AuthResult(True, 0)
         # Checks if the user is the creator
         if planner.createdBy == userId:
+            logger.debug(f"User {userId} is the creator of planner {plannerId}.")
             return AuthResult(True, 0)
     else:
+        logger.debug(f"Planner {plannerId} is not found.")
         return AuthResult(False, -300)
 
     # Checks for planner private permissions.
+    logger.debug(f"Checking private permission: {permission} for planner {plannerId}, user {userId}")
     if userId:
         plannerPermission = getUserPlannerPermission(userId, plannerId)
         if plannerPermission:
             if permission in plannerPermission.permissions:
+                logger.debug(f"User {userId} has permission {permission} for planner {plannerId}.")
                 return AuthResult(True, 0)  # User-specific permission
-
+    logger.debug(f"User {userId} does not have permission {permission} for planner {plannerId}.")
     return AuthResult(False, -105, message=f"Access is denied: userId of {str(userId) if userId else '<PUBLIC>'} do not have the {permission} permission to access the requested resource.")
 
 
@@ -198,10 +214,10 @@ def sendEmailOTP(userId, permission='verify-email'):
             if emaillib.core.sendEmail(OTPEmail, email=user.email, subject="Verify your email address", name=user.userName, code=otp, permission=permission):
                 return otp
             else:
-                logging.error(f"Failed to send email to {user.email} ({userId})")
+                logger.error(f"Failed to send email to {user.email} ({userId})")
                 return None
         else:
-            logging.error("Failed to generate OTP")
+            logger.error("Failed to generate OTP")
             return None
     
 

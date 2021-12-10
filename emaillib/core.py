@@ -2,7 +2,7 @@ import json
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from .templates.base import EmailTemplate
-import logging
+import logger
 
 APIKEY = None
 
@@ -10,7 +10,7 @@ try:
     with open('secrets.json') as f:
         r = json.loads(f.read())
         APIKEY = r['apikey']
-        logging.info("APIKey was read.")
+        logger.info("APIKey was read.")
 except Exception as e:
     raise PermissionError("Could not read the API key.", e)
 

@@ -4,13 +4,13 @@ from RequestMap.Response.JSON import JSONStandardizer
 from security.Validators import AuthenticationValidator, PlannerPermissionValidator
 from mongoengine import connect
 from flask import Flask
-import logging
+import logger
 
-logging.info("Initializing App...")
+logger.info("Initializing App...")
 
 API = Map()
 
-logging.info("Initialising RequestMap...")
+logger.info("Initialising RequestMap...")
 
 FlaskApp = Flask(__name__)
 FlaskProtocolInstance = HTTPViaFlask(FlaskApp)
@@ -46,19 +46,20 @@ API.useResponseHandler(JSONStandardizerInstance)
 # - RequestMap will try and fetch above values from the request data; If those values are missing, then the request will be rejected and a MissingParameter() exception will be raised.
 # - The evaluationFunction will then be called. If there's no exception, then RequestMap assumes that the request is valid. (and if there is any errors, say the user's token is invalid, then a ValidationError() exception should be raised)
 
+API.useValidator(logger.Log()) # Not a validator. Just a logger.
 API.useValidator(AuthenticationValidator())
 API.useValidator(PlannerPermissionValidator())
 
 app = FlaskProtocolInstance.app
 
-logging.info("RequestMap initialised. Connecting to db...")
+logger.info("RequestMap initialised. Connecting to db...")
 
 try:
     connect('time2meet')
 except Exception as e:
-    logging.fatal("Could not connect to db: " + str(e))
+    logger.fatal("Could not connect to db: " + str(e))
     raise
 
 
-logging.info("db connected.")
-logging.info("App initialised.")
+logger.info("db connected.")
+logger.info("App initialised.")

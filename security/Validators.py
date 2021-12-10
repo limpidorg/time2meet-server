@@ -1,7 +1,7 @@
 from RequestMap.Validators.ValidatorBase import StandardValidator, ValidationError
 import core.auth
 import core.planner
-import logging
+import logger
 
 
 class AuthenticationValidator(StandardValidator):
@@ -37,7 +37,7 @@ class AuthenticationValidator(StandardValidator):
             authLevel = endpoint['metadata']['authlevel']
         else:
             authLevel = 'verify-token'
-            logging.warning('No authLevel specified for endpoint ' +
+            logger.warning('No authLevel specified for endpoint ' +
                             endpoint['endpointIdentifier'] + ', defaulting to verify-token')
 
         if authLevel in self.AUTHENTICATION_METHODS:
