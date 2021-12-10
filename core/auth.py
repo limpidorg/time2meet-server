@@ -107,6 +107,7 @@ def plannerPermission(permission, plannerId, userId=None):
 
 
 def updateUserPlannerPermissions(userId, plannerId, permissions=[]):
+    logger.debug(f"Updating permissions for user {userId}, planner {plannerId} to {str(permissions)}...")
     if not core.planner.getPlanner(plannerId):
         return False
     if not core.user.getUser(userId):
@@ -116,10 +117,12 @@ def updateUserPlannerPermissions(userId, plannerId, permissions=[]):
     if plannerPermission:
         if permissions == []:
             plannerPermission.delete()
+            logger.debug(f"Removed permissions for user {userId}, planner {plannerId}.")
             return True
         plannerPermission.permissions = permissions
         try:
             plannerPermission.save()
+            logger.debug(f"Updated permissions for user {userId}, planner {plannerId}")
             return True
         except:
             return False
@@ -128,6 +131,7 @@ def updateUserPlannerPermissions(userId, plannerId, permissions=[]):
             userId=userId, plannerId=plannerId, permissions=permissions)
         try:
             plannerPermission.save()
+            logger.debug(f"Created new planner permission for user {userId}, planner {plannerId}")
             return True
         except:
             return False
@@ -148,6 +152,7 @@ def generateToken(userId, maxAge=86400 * 7, scopes=[]) -> str:
             Token(token=token, expires=time.time() + maxAge, scopes=scopes))
         try:
             user.save()
+            logger.debug(f"Generated token {token} for user {userId}.")
             return token
         except Exception as e:
             raise
@@ -155,7 +160,7 @@ def generateToken(userId, maxAge=86400 * 7, scopes=[]) -> str:
     return None
 
 
-def getToken(userId, token) -> dict:
+def getTokenInfo(userId, token) -> dict:
     user = core.user.getUser(userId)
     if user:
         _cleanExpiredTokens(userId)
@@ -189,6 +194,7 @@ def generateOTP(userId, permission='verify-identity'):
         otpEntry = OTP(userId=userId, otp=otp, expires=time.time() + 600, permission=permission)
         try:
             otpEntry.save()
+            logger.debug(f"Generated OTP {otp} for user {userId}.")
             return otp
         except:
             return None
@@ -202,16 +208,21 @@ def verifyOTP(userId, otp, permission='verify-identity'):
         for otpEntry in OTP.objects(userId=userId):
             if otpEntry.otp == otp and otpEntry.expires > time.time() and otpEntry.permission == permission:
                 otpEntry.delete()
+                logger.debug(f"Verified OTP {otp} for user {userId}.")
                 return True
+        logger.debug(f"Invalid OTP {otp} for user {userId}.")
         return False
+    logger.debug(f"User {userId} is not found.")
     return False
 
 def sendEmailOTP(userId, permission='verify-email'):
+    logger.debug(f"Sending OTP to user {userId}...")
     user = core.user.getUser(userId)
     if user:
         otp = generateOTP(userId, permission=permission)
         if otp:
             if emaillib.core.sendEmail(OTPEmail, email=user.email, subject="Verify your email address", name=user.userName, code=otp, permission=permission):
+                logger.debug(f"OTP {otp} is sent to user {userId}.")
                 return otp
             else:
                 logger.error(f"Failed to send email to {user.email} ({userId})")

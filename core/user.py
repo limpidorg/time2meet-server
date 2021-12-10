@@ -15,7 +15,7 @@ def createUser(userName: str, email: str, password: str, timeShift: float = 0) -
     while getUser(userId):
         userId = secrets.token_hex(8)
 
-    salt = secrets.token_hex(16)
+    salt = secrets.token_hex(32)
     passwordHash = hashlib.sha256(
         str(password + salt).encode('utf-8')).hexdigest()
 
@@ -24,6 +24,7 @@ def createUser(userName: str, email: str, password: str, timeShift: float = 0) -
     try:
         user.save()
         core.auth.sendEmailOTP(userId, permission='verify-email')
+        logger.debug('User created: ' + userId)
         return userId
     except:
         return None
@@ -40,6 +41,7 @@ def editUser(userId: str, properties: dict, protectProperties=True):
         # Protect those properties
         for key in protectedProperties:
             if key in properties:
+                logger.debug('Attempted to edit protected property: ' + key)
                 return False
 
     # Update status if email is in properties
@@ -53,6 +55,7 @@ def editUser(userId: str, properties: dict, protectProperties=True):
         user.save()
         if 'email' in properties:
             core.auth.sendEmailOTP(userId, permission='verify-email')
+        logger.debug('User updated: ' + userId)
         return True
     except:
         return False
@@ -61,11 +64,14 @@ def editUser(userId: str, properties: dict, protectProperties=True):
 def deleteUser(userId: str):
     user = getUser(userId)
     if not user:
+        logger.debug('User not found: ' + userId)
         return False
     try:
         user.delete()
+        logger.debug('User deleted: ' + userId)
         return True
-    except:
+    except Exception as e:
+        logger.error(e)
         return False
 
 

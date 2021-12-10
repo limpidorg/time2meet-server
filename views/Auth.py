@@ -60,7 +60,7 @@ def logout(userId, token, makeResponse):
     'authlevel': 'verify-token'
 })
 def getTokenInfo(userId, token, makeResponse):
-    tokenInfo = core.auth.getToken(userId, token)
+    tokenInfo = core.auth.getTokenInfo(userId, token)
     if not tokenInfo:
         raise Exception("Impossible case!")
     else:
