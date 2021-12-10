@@ -1,5 +1,5 @@
 from RequestMap.EndpointMap import Map
-from RequestMap.Protocols.Flask import HTTPViaFlask, HTTPBatchRequestViaFlask
+from RequestMap.Protocols.Flask import HTTPRequestByEndpointIdentifier, HTTPViaFlask, HTTPBatchRequestViaFlask
 from RequestMap.Response.JSON import JSONStandardizer
 from security.Validators import AuthenticationValidator, PlannerPermissionValidator
 from mongoengine import connect
@@ -15,8 +15,10 @@ logging.info("Initialising RequestMap...")
 FlaskApp = Flask(__name__)
 FlaskProtocolInstance = HTTPViaFlask(FlaskApp)
 FlaskBatchProtocolInstance = HTTPBatchRequestViaFlask(FlaskApp, route="/batch")
+HTTPRequestByEndpointIdentifierInstance = HTTPRequestByEndpointIdentifier(FlaskApp, route='/science')
 API.useProtocol(FlaskProtocolInstance)
 API.useProtocol(FlaskBatchProtocolInstance)
+API.useProtocol(HTTPRequestByEndpointIdentifierInstance)
 
 JSONStandardizerInstance = JSONStandardizer(standardMessages={
     0: "Success",

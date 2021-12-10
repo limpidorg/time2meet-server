@@ -31,3 +31,11 @@
 | Code | Message                |
 | ---- | ---------------------- |
 | -300 | Planner does not exist |
+
+## RequestMap
+
+| Code   | Message                                                    |
+| ------ | ---------------------------------------------------------- |
+| -10000 | Endpoint {name} can not be found                           |
+| -10001 | Missing parameter: {name}                                  |
+| -10002 | Parameter {name} can not be converted to the required type |
