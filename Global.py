@@ -1,6 +1,7 @@
 from RequestMap.EndpointMap import Map
 from RequestMap.Protocols.Flask import HTTPRequestByEndpointIdentifier, HTTPViaFlask, HTTPBatchRequestViaFlask
 from RequestMap.Response.JSON import JSONStandardizer
+from logger import JSONStandardizerWithLogs
 from security.Validators import AuthenticationValidator, PlannerPermissionValidator
 from mongoengine import connect
 from flask import Flask
@@ -20,7 +21,7 @@ API.useProtocol(FlaskProtocolInstance)
 API.useProtocol(FlaskBatchProtocolInstance)
 API.useProtocol(HTTPRequestByEndpointIdentifierInstance)
 
-JSONStandardizerInstance = JSONStandardizer(standardMessages={
+JSONStandardizerInstance = JSONStandardizerWithLogs(standardMessages={ # Using a modified version of the JSONStandardizer that logs exceptions
     0: "Success",
     -1: "Could not complete the request.",
     -100: "No authentication method is available",

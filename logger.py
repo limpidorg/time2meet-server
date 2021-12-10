@@ -5,6 +5,7 @@ import json
 import threading
 
 from RequestMap.Validators.ValidatorBase import StandardValidator
+from RequestMap.Response.JSON import JSONStandardizer
 
 init()
 
@@ -91,6 +92,11 @@ class Log(StandardValidator):
             return
         return evaluate
 
+class JSONStandardizerWithLogs(JSONStandardizer):
+    def exceptionHandler(self, exception, *, protocolName=None):
+        error(str(exception))
+        return super().exceptionHandler(exception, protocolName=protocolName)
+        
 
 with open('secrets.json', 'r') as f:
     secrets = json.load(f)
