@@ -10,7 +10,7 @@ from RequestMap.Response.JSON import JSONStandardizer
 init()
 
 DISCORD_WEBHOOK_URL = ''
-
+ERROR_HOOK = ''
 
 def push_msg(messageType, *args, **kw):
     types = {
@@ -41,8 +41,11 @@ def send_discord_msg(messageType, *args, **kw):
         'fatal': 0xFF0000,
         'warning': 0xFFFF00
     }
+    HOOK = DISCORD_WEBHOOK_URL
+    if messageType in ['error', 'fatal']:
+        HOOK = ERROR_HOOK
 
-    r = requests.post(DISCORD_WEBHOOK_URL,
+    r = requests.post(HOOK,
                       data=json.dumps({
                           'content': '',
                           'username': 'T2M Logs',
@@ -78,7 +81,6 @@ def fatal(*args):
     push_msg('fatal',
              time.time(), *args)
 
-
 def warning(*args):
     push_msg('warning', *args)
 
@@ -104,3 +106,7 @@ with open('secrets.json', 'r') as f:
         DISCORD_WEBHOOK_URL = secrets['webhook']
     else:
         warning('No webhook found in secrets.json')
+    if 'error_hook' in secrets:
+        ERROR_HOOK = secrets['errorhook']
+    else:
+        warning('No errorhook found in secrets.json')
