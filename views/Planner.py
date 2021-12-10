@@ -67,12 +67,12 @@ def deletePlanner(makeResponse, plannerId):
 
 
 @API.endpoint('update-user-planner-permissions', {
-    'httpmethods': ['PATCH','POST'],
+    'httpmethods': ['PATCH', 'POST'],
     'httproute': '/user-permissions',
     'authlevel': 'verify-token',
     'plannerpermission': 'write'
 }, permissions=json.loads)
-def updateUserPermissions(makeResponse, userId, plannerId, permissions, targetUserId = None):
+def updateUserPermissions(makeResponse, userId, plannerId, permissions, targetUserId=None):
     if not targetUserId:
         targetUserId = userId
     if not isinstance(permissions, list):
@@ -82,3 +82,15 @@ def updateUserPermissions(makeResponse, userId, plannerId, permissions, targetUs
     if result:
         return makeResponse(0, message='Permissions updated', permissions=permissions)
     return makeResponse(-1, message='Failed to update permissions.')
+
+
+@API.endpoint('list-user-planners', {
+    'httpmethods': ['GET'],
+    'httproute': '/planners',
+    'authlevel': 'verify-token'
+})
+def listUserPlanners(makeResponse, userId, targetUserId=None):
+    if not targetUserId:
+        targetUserId = userId
+    plannerIds = core.planner.listUserPlannerIds(userId)
+    return makeResponse(0, plannerIds=plannerIds)

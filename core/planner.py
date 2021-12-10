@@ -1,4 +1,5 @@
-from database import Planner
+from database import Planner, TimePreference, PlannerPermission
+from mongoengine.queryset.visitor import Q
 import secrets
 import time
 
@@ -36,3 +37,21 @@ def deletePlanner(plannerId):
         planner.delete()
         return True
     return False
+
+def listUserPlannerIds(userId):
+    # planners = Planner.objects.filter(createdBy=userId).values_list('plannerId') # User-created planners
+    # for planner in PlannerPermission.objects(userId=userId):
+    #     if planner.permission != [] and planner:
+    userCreated = Planner.objects(createdBy=userId)
+    planners = []
+    for planner in userCreated:
+        planners.append(planner.plannerId)
+    for planner in PlannerPermission.objects(userId=userId):
+        # Planners that the user have access to
+        if planner.permissions != [] and planner.plannerId not in planners:
+            planners.append(planner.plannerId)
+    for timePreference in TimePreference.objects(userId=userId):
+        # Planners that the user have at least one preference to
+        if timePreference.plannerId not in planners:
+            planners.append(timePreference.plannerId)
+    return planners
