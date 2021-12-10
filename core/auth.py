@@ -9,6 +9,7 @@ import hashlib
 from emaillib.templates.general import GeneralEmail, OTPEmail
 import emaillib.core
 
+
 class AuthResult():
     def __init__(self, succeeded, code, userId=None, scopes=[], message=None, data=None):
         self.succeeded = succeeded
@@ -81,33 +82,39 @@ def getUserPlannerPermission(userId, plannerId):
 def plannerPermission(permission, plannerId, userId=None):
     planner = core.planner.getPlanner(plannerId)
     if planner:
-        logger.debug(f"Checking permission {permission} for planner {plannerId}")
+        logger.debug(
+            f"Checking permission {permission} for planner {plannerId}")
         # Checks for planner public permissions.
         if permission in planner.permissions:
             logger.info(f"Permission {permission} is available to the public.")
             return AuthResult(True, 0)
         # Checks if the user is the creator
         if planner.createdBy == userId:
-            logger.info(f"User {userId} is the creator of planner {plannerId}.")
+            logger.info(
+                f"User {userId} is the creator of planner {plannerId}.")
             return AuthResult(True, 0)
     else:
         logger.warning(f"Planner {plannerId} is not found.")
         return AuthResult(False, -300)
 
     # Checks for planner private permissions.
-    logger.debug(f"Checking private permission: {permission} for planner {plannerId}, user {userId}")
+    logger.debug(
+        f"Checking private permission: {permission} for planner {plannerId}, user {userId}")
     if userId:
         plannerPermission = getUserPlannerPermission(userId, plannerId)
         if plannerPermission:
             if permission in plannerPermission.permissions:
-                logger.info(f"User {userId} has permission {permission} for planner {plannerId}.")
+                logger.info(
+                    f"User {userId} has permission {permission} for planner {plannerId}.")
                 return AuthResult(True, 0)  # User-specific permission
-    logger.warning(f"User {userId} does not have permission {permission} for planner {plannerId}.")
+    logger.warning(
+        f"User {userId} does not have permission {permission} for planner {plannerId}.")
     return AuthResult(False, -105, message=f"Access is denied: userId of {str(userId) if userId else '<PUBLIC>'} do not have the {permission} permission to access the requested resource.")
 
 
 def updateUserPlannerPermissions(userId, plannerId, permissions=[]):
-    logger.debug(f"Updating permissions for user {userId}, planner {plannerId} to {str(permissions)}...")
+    logger.debug(
+        f"Updating permissions for user {userId}, planner {plannerId} to {str(permissions)}...")
     if not core.planner.getPlanner(plannerId):
         return False
     if not core.user.getUser(userId):
@@ -117,12 +124,14 @@ def updateUserPlannerPermissions(userId, plannerId, permissions=[]):
     if plannerPermission:
         if permissions == []:
             plannerPermission.delete()
-            logger.info(f"Removed permissions for user {userId}, planner {plannerId}.")
+            logger.info(
+                f"Removed permissions for user {userId}, planner {plannerId}.")
             return True
         plannerPermission.permissions = permissions
         try:
             plannerPermission.save()
-            logger.info(f"Updated permissions for user {userId}, planner {plannerId}")
+            logger.info(
+                f"Updated permissions for user {userId}, planner {plannerId}")
             return True
         except:
             return False
@@ -131,7 +140,8 @@ def updateUserPlannerPermissions(userId, plannerId, permissions=[]):
             userId=userId, plannerId=plannerId, permissions=permissions)
         try:
             plannerPermission.save()
-            logger.info(f"Created new planner permission for user {userId}, planner {plannerId}")
+            logger.info(
+                f"Created new planner permission for user {userId}, planner {plannerId}")
             return True
         except:
             return False
@@ -161,13 +171,17 @@ def generateToken(userId, maxAge=86400 * 7, scopes=[]) -> str:
 
 
 def getTokenInfo(userId, token) -> dict:
+    logger.debug(f"Getting token info for user {userId} and token {token}")
     user = core.user.getUser(userId)
     if user:
         _cleanExpiredTokens(userId)
         for t in user.tokens:
             if t.token == token and t.expires > time.time():
+                logger.info(f"Got token info. token={token}, user={userId}.")
                 return t
+        logger.warning(f"Token {token} does not exist (user={userId}).")
         return None
+    logger.warning(f"User {userId} is not found.")
     return None
 
 
@@ -191,7 +205,8 @@ def generateOTP(userId, permission='verify-identity'):
     user = core.user.getUser(userId)
     if user:
         otp = secrets.token_hex(3).upper()
-        otpEntry = OTP(userId=userId, otp=otp, expires=time.time() + 600, permission=permission)
+        otpEntry = OTP(userId=userId, otp=otp,
+                       expires=time.time() + 600, permission=permission)
         try:
             otpEntry.save()
             logger.info(f"Generated OTP {otp} for user {userId}.")
@@ -215,6 +230,7 @@ def verifyOTP(userId, otp, permission='verify-identity'):
     logger.warning(f"User {userId} is not found.")
     return False
 
+
 def sendEmailOTP(userId, permission='verify-email'):
     logger.debug(f"Sending OTP to user {userId}...")
     user = core.user.getUser(userId)
@@ -225,11 +241,9 @@ def sendEmailOTP(userId, permission='verify-email'):
                 logger.info(f"OTP {otp} is sent to user {userId}.")
                 return otp
             else:
-                logger.warning(f"Failed to send email to {user.email} ({userId})")
+                logger.warning(
+                    f"Failed to send email to {user.email} ({userId})")
                 return None
         else:
             logger.error("Failed to generate OTP")
             return None
-    
-
-    

@@ -5,6 +5,7 @@ import security.desensitizer
 import json
 from RequestMap.Exceptions import ValidationError
 import hashlib
+import logger
 
 
 @API.endpoint('login', {
@@ -62,6 +63,7 @@ def logout(userId, token, makeResponse):
 def getTokenInfo(userId, token, makeResponse):
     tokenInfo = core.auth.getTokenInfo(userId, token)
     if not tokenInfo:
+        logger.fatal('Impossible case', tokenInfo)
         raise Exception("Impossible case!")
     else:
         return makeResponse(0, token=security.desensitizer.desensitizeTokenInfo(json.loads(tokenInfo.to_json())))
@@ -92,7 +94,8 @@ def sendEmailVerification(userId, makeResponse):
 }, otp=str)
 def verifyEmail(userId, otp, makeResponse):
     otp = otp.upper()
-    user = core.user.getUser(userId) # Must exist - otherwise the token auth would have failed.
+    # Must exist - otherwise the token auth would have failed.
+    user = core.user.getUser(userId)
     if core.auth.verifyOTP(userId, otp, permission='verify-email'):
         try:
             user.status = 'active'
@@ -102,6 +105,7 @@ def verifyEmail(userId, otp, makeResponse):
         return makeResponse(0, 'Email has been verified.')
     else:
         return makeResponse(-107)
+
 
 @API.endpoint('reset-password', {
     'httpmethods': ['GET'],
@@ -113,6 +117,7 @@ def resetPassword(userId, makeResponse):
         return makeResponse(0, 'Password reset code has been sent.')
     else:
         return makeResponse(-1, 'Could not send OTP')
+
 
 @API.endpoint('verify-reset-password', {
     'httpmethods': ['POST'],
