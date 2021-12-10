@@ -9,12 +9,15 @@ def newPlanner(plannerName, notBefore, notAfter, createdBy):
     planner = Planner(plannerId=plannerId, plannerName=plannerName,
                       notBefore=notBefore, notAfter=notAfter, createdBy=createdBy, creationTime=time.time())
     planner.save()
-    logger.debug('Created planner: ' + plannerId)
+    logger.info('Created planner: ' + plannerId)
     return plannerId
 
 def getPlanner(plannerId):
     planner = Planner.objects(plannerId=plannerId).first()
-    logger.debug('Retrieved planner: ' + plannerId)
+    if planner:
+        logger.debug('Retrieved planner: ' + plannerId)
+    else:
+        logger.warning('Planner: ' + plannerId + ' does not exist')
     return planner
 
 def editPlanner(plannerId, properties):
@@ -22,7 +25,7 @@ def editPlanner(plannerId, properties):
     protectedProperties = ['createdBy', 'creationTime']
     for property in protectedProperties:
         if property in properties:
-            logger.warning('Attempted to edit protected property: ' + property)
+            logger.error('Attempted to edit protected property: ' + property)
             return False
 
     if planner:
@@ -30,7 +33,7 @@ def editPlanner(plannerId, properties):
             setattr(planner, key, properties[key])
         try:
             planner.save()
-            logger.debug('Edited planner: ' + plannerId)
+            logger.info('Edited planner: ' + plannerId)
             return True
         except Exception as e:
             logger.error('Failed to edit planner: ' + plannerId + '\n' + str(e))
@@ -41,7 +44,7 @@ def deletePlanner(plannerId):
     planner = getPlanner(plannerId)
     if planner:
         planner.delete()
-        logger.debug('Deleted planner: ' + plannerId)
+        logger.info('Deleted planner: ' + plannerId)
         return True
     return False
 
@@ -61,5 +64,5 @@ def listUserPlannerIds(userId):
         # Planners that the user have at least one preference to
         if timePreference.plannerId not in planners:
             planners.append(timePreference.plannerId)
-    logger.debug(f'Retrieved planner ids {str(planners)} for user: ' + userId)
+    logger.info(f'Retrieved planner ids {str(planners)} for user: ' + userId)
     return planners

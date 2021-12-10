@@ -24,7 +24,7 @@ def createUser(userName: str, email: str, password: str, timeShift: float = 0) -
     try:
         user.save()
         core.auth.sendEmailOTP(userId, permission='verify-email')
-        logger.debug('User created: ' + userId)
+        logger.info('User created: ' + userId)
         return userId
     except:
         return None
@@ -41,7 +41,7 @@ def editUser(userId: str, properties: dict, protectProperties=True):
         # Protect those properties
         for key in protectedProperties:
             if key in properties:
-                logger.debug('Attempted to edit protected property: ' + key)
+                logger.error('Attempted to edit protected property: ' + key)
                 return False
 
     # Update status if email is in properties
@@ -55,7 +55,7 @@ def editUser(userId: str, properties: dict, protectProperties=True):
         user.save()
         if 'email' in properties:
             core.auth.sendEmailOTP(userId, permission='verify-email')
-        logger.debug('User updated: ' + userId)
+        logger.info('User updated: ' + userId)
         return True
     except:
         return False
@@ -64,11 +64,11 @@ def editUser(userId: str, properties: dict, protectProperties=True):
 def deleteUser(userId: str):
     user = getUser(userId)
     if not user:
-        logger.debug('User not found: ' + userId)
+        logger.warning('User not found: ' + userId)
         return False
     try:
         user.delete()
-        logger.debug('User deleted: ' + userId)
+        logger.info('User deleted: ' + userId)
         return True
     except Exception as e:
         logger.error(e)

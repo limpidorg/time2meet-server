@@ -32,11 +32,11 @@ def verifyToken(userId, token) -> AuthResult:
         logger.debug(f"Verifying token {token} of user {userId}.")
         for t in user.tokens:
             if t.token == token and t.expires > time.time():
-                logger.debug(f"Token {token} of user {userId} is valid.")
+                logger.info(f"Token {token} of user {userId} is valid.")
                 return AuthResult(True, 0, userId, t.scopes)
-        logger.debug(f"Token {token} of user {userId} is invalid.")
+        logger.warning(f"Token {token} of user {userId} is invalid.")
         return AuthResult(False, -101)
-    logger.debug(f"User {userId} is not found.")
+    logger.warning(f"User {userId} is not found.")
     return AuthResult(False, -200)
 
 
@@ -66,11 +66,11 @@ def verifyPassword(userId, password):
         passwordHash = hashlib.sha256(
             str(password + salt).encode('utf-8')).hexdigest()
         if user.password == passwordHash:
-            logger.debug(f"Password for user {userId} is valid.")
+            logger.info(f"Password for user {userId} is valid.")
             return AuthResult(True, 0, userId)
-        logger.debug(f"Password for user {userId} is invalid.")
+        logger.warning(f"Password for user {userId} is invalid.")
         return AuthResult(False, -103)
-    logger.debug(f"User {userId} is not found.")
+    logger.warning(f"User {userId} is not found.")
     return AuthResult(False, -200)
 
 
@@ -84,14 +84,14 @@ def plannerPermission(permission, plannerId, userId=None):
         logger.debug(f"Checking permission {permission} for planner {plannerId}")
         # Checks for planner public permissions.
         if permission in planner.permissions:
-            logger.debug(f"Permission {permission} is available to the public.")
+            logger.info(f"Permission {permission} is available to the public.")
             return AuthResult(True, 0)
         # Checks if the user is the creator
         if planner.createdBy == userId:
-            logger.debug(f"User {userId} is the creator of planner {plannerId}.")
+            logger.info(f"User {userId} is the creator of planner {plannerId}.")
             return AuthResult(True, 0)
     else:
-        logger.debug(f"Planner {plannerId} is not found.")
+        logger.warning(f"Planner {plannerId} is not found.")
         return AuthResult(False, -300)
 
     # Checks for planner private permissions.
@@ -100,9 +100,9 @@ def plannerPermission(permission, plannerId, userId=None):
         plannerPermission = getUserPlannerPermission(userId, plannerId)
         if plannerPermission:
             if permission in plannerPermission.permissions:
-                logger.debug(f"User {userId} has permission {permission} for planner {plannerId}.")
+                logger.info(f"User {userId} has permission {permission} for planner {plannerId}.")
                 return AuthResult(True, 0)  # User-specific permission
-    logger.debug(f"User {userId} does not have permission {permission} for planner {plannerId}.")
+    logger.warning(f"User {userId} does not have permission {permission} for planner {plannerId}.")
     return AuthResult(False, -105, message=f"Access is denied: userId of {str(userId) if userId else '<PUBLIC>'} do not have the {permission} permission to access the requested resource.")
 
 
@@ -117,12 +117,12 @@ def updateUserPlannerPermissions(userId, plannerId, permissions=[]):
     if plannerPermission:
         if permissions == []:
             plannerPermission.delete()
-            logger.debug(f"Removed permissions for user {userId}, planner {plannerId}.")
+            logger.info(f"Removed permissions for user {userId}, planner {plannerId}.")
             return True
         plannerPermission.permissions = permissions
         try:
             plannerPermission.save()
-            logger.debug(f"Updated permissions for user {userId}, planner {plannerId}")
+            logger.info(f"Updated permissions for user {userId}, planner {plannerId}")
             return True
         except:
             return False
@@ -131,7 +131,7 @@ def updateUserPlannerPermissions(userId, plannerId, permissions=[]):
             userId=userId, plannerId=plannerId, permissions=permissions)
         try:
             plannerPermission.save()
-            logger.debug(f"Created new planner permission for user {userId}, planner {plannerId}")
+            logger.info(f"Created new planner permission for user {userId}, planner {plannerId}")
             return True
         except:
             return False
@@ -152,7 +152,7 @@ def generateToken(userId, maxAge=86400 * 7, scopes=[]) -> str:
             Token(token=token, expires=time.time() + maxAge, scopes=scopes))
         try:
             user.save()
-            logger.debug(f"Generated token {token} for user {userId}.")
+            logger.info(f"Generated token {token} for user {userId}.")
             return token
         except Exception as e:
             raise
@@ -194,7 +194,7 @@ def generateOTP(userId, permission='verify-identity'):
         otpEntry = OTP(userId=userId, otp=otp, expires=time.time() + 600, permission=permission)
         try:
             otpEntry.save()
-            logger.debug(f"Generated OTP {otp} for user {userId}.")
+            logger.info(f"Generated OTP {otp} for user {userId}.")
             return otp
         except:
             return None
@@ -208,11 +208,11 @@ def verifyOTP(userId, otp, permission='verify-identity'):
         for otpEntry in OTP.objects(userId=userId):
             if otpEntry.otp == otp and otpEntry.expires > time.time() and otpEntry.permission == permission:
                 otpEntry.delete()
-                logger.debug(f"Verified OTP {otp} for user {userId}.")
+                logger.info(f"Verified OTP {otp} for user {userId}.")
                 return True
-        logger.debug(f"Invalid OTP {otp} for user {userId}.")
+        logger.warning(f"Invalid OTP {otp} for user {userId}.")
         return False
-    logger.debug(f"User {userId} is not found.")
+    logger.warning(f"User {userId} is not found.")
     return False
 
 def sendEmailOTP(userId, permission='verify-email'):
@@ -222,10 +222,10 @@ def sendEmailOTP(userId, permission='verify-email'):
         otp = generateOTP(userId, permission=permission)
         if otp:
             if emaillib.core.sendEmail(OTPEmail, email=user.email, subject="Verify your email address", name=user.userName, code=otp, permission=permission):
-                logger.debug(f"OTP {otp} is sent to user {userId}.")
+                logger.info(f"OTP {otp} is sent to user {userId}.")
                 return otp
             else:
-                logger.error(f"Failed to send email to {user.email} ({userId})")
+                logger.warning(f"Failed to send email to {user.email} ({userId})")
                 return None
         else:
             logger.error("Failed to generate OTP")
