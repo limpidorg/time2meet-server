@@ -55,7 +55,6 @@ def send_discord_msg(messageType, *args, **kw):
                           'color': discord_colors.get(messageType, 0x000000)
                       }]
                   }), headers={'Content-Type': 'application/json'})
-    print(r.text)
 
 
 def log(*args):
