@@ -46,8 +46,8 @@ def _cleanExpiredTokens(user):
         pass
 
 
-def _cleanExpiredOTP(userId):
-    for entry in OTP.objects(userId=userId):
+def _cleanExpiredOTP():
+    for entry in OTP.objects():
         if entry.expires <= time.time():
             entry.delete()
 
@@ -182,7 +182,7 @@ def generateOTP(userId, permission='verify-identity'):
 def verifyOTP(userId, otp, permission='verify-identity'):
     user = core.user.getUser(userId)
     if user:
-        _cleanExpiredOTP(userId)
+        _cleanExpiredOTP()
         for otpEntry in OTP.objects(userId=userId):
             if otpEntry.otp == otp and otpEntry.expires > time.time() and otpEntry.permission == permission:
                 otpEntry.delete()
