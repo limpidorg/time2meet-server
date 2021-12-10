@@ -1,7 +1,9 @@
+import logging
 from database import User
 import secrets
 import hashlib
 import time
+import core.auth
 
 
 def getUser(userId):
@@ -21,12 +23,13 @@ def createUser(userName: str, email: str, password: str, timeShift: float = 0) -
                 password=passwordHash, salt=salt, registerationTime=time.time(), timeShift=timeShift)
     try:
         user.save()
+        core.auth.sendEmailOTP(userId, permission='verify-email')
         return userId
     except:
         return None
 
 
-def editUser(userId: str, properties: dict, protectProperties = True):
+def editUser(userId: str, properties: dict, protectProperties=True):
     protectedProperties = ['userId', 'status',
                            'tokens', 'salt', 'registerationTime', 'password']
     user = getUser(userId)
@@ -48,6 +51,8 @@ def editUser(userId: str, properties: dict, protectProperties = True):
         user[key] = value
     try:
         user.save()
+        if 'email' in properties:
+            core.auth.sendEmailOTP(userId, permission='verify-email')
         return True
     except:
         return False
@@ -66,6 +71,7 @@ def deleteUser(userId: str):
 
 def getUserByEmail(email: str):
     return User.objects(email=email).first()
+
 
 def getUserIdByEmail(email: str):
     user = getUserByEmail(email)

@@ -9,14 +9,16 @@
 
 ## User registration & authentication
 
-| Code | Message                                                              |
-| ---- | -------------------------------------------------------------------- |
-| -100 | No authentication method is available                                |
-| -101 | The token is invalid                                                 |
-| -102 | Either the email is invalid or it's already used by another account. |
-| -103 | The password is invalid                                              |
-| -104 | Access is denied. An elevated permission is required.                |
-| -105 | Access is denied.                                                    |
+| Code | Message                                                                                                                          |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------- |
+| -100 | No authentication method is available                                                                                            |
+| -101 | The token is invalid                                                                                                             |
+| -102 | Either the email is invalid or it's already used by another account.                                                             |
+| -103 | The password is invalid                                                                                                          |
+| -104 | Access is denied. An elevated permission is required.                                                                            |
+| -105 | Access is denied.                                                                                                                |
+| -106 | The user's email address had already been verified.                                                                              |
+| -107 | Invalid OTP. The code might have expired, or the current OTP's permission does not match its intended purpose. Please try again. |
 
 ## User account
 

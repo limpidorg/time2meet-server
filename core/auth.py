@@ -1,10 +1,13 @@
-from database import User, Token, PlannerPermission
+import logging
+from database import User, Token, PlannerPermission, OTP
 import core.user
 import core.planner
 import time
 import secrets
 import hashlib
 
+from emaillib.templates.general import GeneralEmail, OTPEmail
+import emaillib.core
 
 class AuthResult():
     def __init__(self, succeeded, code, userId=None, scopes=[], message=None, data=None):
@@ -41,6 +44,12 @@ def _cleanExpiredTokens(user):
         user.save()
     except:
         pass
+
+
+def _cleanExpiredOTP(userId):
+    for entry in OTP.objects(userId=userId):
+        if entry.expires <= time.time():
+            entry.delete()
 
 
 def verifyPassword(userId, password):
@@ -130,10 +139,10 @@ def generateToken(userId, maxAge=86400 * 7, scopes=[]) -> str:
     return None
 
 
-def getToken(uID, token) -> dict:
-    user = core.user.getUser(uID)
+def getToken(userId, token) -> dict:
+    user = core.user.getUser(userId)
     if user:
-        _cleanExpiredTokens(user)
+        _cleanExpiredTokens(userId)
         for t in user.tokens:
             if t.token == token and t.expires > time.time():
                 return t
@@ -141,10 +150,10 @@ def getToken(uID, token) -> dict:
     return None
 
 
-def deleteToken(uID, token):
-    user = core.user.getUser(uID)
+def deleteToken(userId, token):
+    user = core.user.getUser(userId)
     if user:
-        _cleanExpiredTokens(user)
+        _cleanExpiredTokens(userId)
         for t in user.tokens:
             if t.token == token:
                 user.tokens.remove(t)
@@ -155,3 +164,45 @@ def deleteToken(uID, token):
                     return False
         return False
     return False
+
+
+def generateOTP(userId, permission='verify-identity'):
+    user = core.user.getUser(userId)
+    if user:
+        otp = secrets.token_hex(3).upper()
+        otpEntry = OTP(userId=userId, otp=otp, expires=time.time() + 600, permission=permission)
+        try:
+            otpEntry.save()
+            return otp
+        except:
+            return None
+    return None
+
+
+def verifyOTP(userId, otp, permission='verify-identity'):
+    user = core.user.getUser(userId)
+    if user:
+        _cleanExpiredOTP(userId)
+        for otpEntry in OTP.objects(userId=userId):
+            if otpEntry.otp == otp and otpEntry.expires > time.time() and otpEntry.permission == permission:
+                otpEntry.delete()
+                return True
+        return False
+    return False
+
+def sendEmailOTP(userId, permission='verify-email'):
+    user = core.user.getUser(userId)
+    if user:
+        otp = generateOTP(userId, permission=permission)
+        if otp:
+            if emaillib.core.sendEmail(OTPEmail, email=user.email, subject="Verify your email address", name=user.userName, code=otp, permission=permission):
+                return otp
+            else:
+                logging.error(f"Failed to send email to {user.email} ({userId})")
+                return None
+        else:
+            logging.error("Failed to generate OTP")
+            return None
+    
+
+    

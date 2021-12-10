@@ -1,4 +1,5 @@
 from typing import List
+from bson.json_util import default
 from mongoengine import Document, StringField
 from mongoengine.document import EmbeddedDocument
 from mongoengine.fields import EmailField, EmbeddedDocumentListField, FloatField, ListField
@@ -46,3 +47,9 @@ class TimePreference(Document):
     notAfter = FloatField(required=True)
     status = StringField(default="available")
     # status can be available, preferred, notpreferred
+
+class OTP(Document):
+    userId = StringField(required=True)
+    otp = StringField(required=True)
+    expires = FloatField(required=True)
+    permission = StringField(default="")

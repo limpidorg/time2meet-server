@@ -4,6 +4,7 @@ import core.user
 import security.desensitizer
 import json
 from RequestMap.Exceptions import ValidationError
+import hashlib
 
 
 @API.endpoint('login', {
@@ -64,3 +65,71 @@ def getTokenInfo(userId, token, makeResponse):
         raise Exception("Impossible case!")
     else:
         return makeResponse(0, token=security.desensitizer.desensitizeTokenInfo(json.loads(tokenInfo.to_json())))
+
+
+@API.endpoint('send-email-verification', {
+    'httpmethods': ['GET'],
+    'httproute': '/email-verification',
+    'authlevel': 'verify-token'
+})
+def sendEmailVerification(userId, makeResponse):
+    user = core.user.getUser(userId)
+    if not user:
+        return makeResponse(-200)
+    else:
+        if user.status != 'require-email-verification':
+            return makeResponse(-106)
+        if core.auth.sendEmailOTP(userId, 'verify-email'):
+            return makeResponse(0, 'Email verification code has been sent.')
+        else:
+            return makeResponse(-1, 'Could not send OTP')
+
+
+@API.endpoint('verify-email', {
+    'httpmethods': ['POST'],
+    'httproute': '/email-verification',
+    'authlevel': 'verify-token'
+}, otp=str)
+def verifyEmail(userId, otp, makeResponse):
+    otp = otp.upper()
+    user = core.user.getUser(userId) # Must exist - otherwise the token auth would have failed.
+    if core.auth.verifyOTP(userId, otp, permission='verify-email'):
+        try:
+            user.status = 'active'
+            user.save()
+        except Exception as e:
+            return makeResponse(-1, 'Could not update user status')
+        return makeResponse(0, 'Email has been verified.')
+    else:
+        return makeResponse(-107)
+
+@API.endpoint('reset-password', {
+    'httpmethods': ['GET'],
+    'httproute': '/reset-password',
+    'authlevel': 'public'
+}, otp=str)
+def resetPassword(userId, makeResponse):
+    if core.auth.sendEmailOTP(userId, 'reset-password'):
+        return makeResponse(0, 'Password reset code has been sent.')
+    else:
+        return makeResponse(-1, 'Could not send OTP')
+
+@API.endpoint('verify-reset-password', {
+    'httpmethods': ['POST'],
+    'httproute': '/reset-password',
+    'authlevel': 'public'
+}, otp=str, password=str)
+def verifyResetPassword(userId, otp, newPassword, makeResponse):
+    if core.auth.verifyOTP(userId, otp, permission='reset-password'):
+        user = core.user.getUser(userId)
+        if user:
+            passwordHash = hashlib.sha256(
+                str(newPassword + user.salt).encode('utf-8')).hexdigest()
+            if core.user.editUser(userId, properties={'password': passwordHash}, protectProperties=False):
+                # Return updated user
+                user = core.user.getUser(userId)
+                return makeResponse(0, user=security.desensitizer.desensitizeUser(json.loads(user.to_json())))
+            else:
+                return makeResponse(-1)
+        return makeResponse(-200)
+    return makeResponse(-107)

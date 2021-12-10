@@ -63,11 +63,11 @@ def editUser(userId, properties, makeResponse):
     'httproute': '/password',
     'authlevel': 'verify-password'
 }, userId=str, password=str)
-def updatePassword(userId, password, makeResponse):
+def updatePassword(userId, newPassword, makeResponse):
     user = core.user.getUser(userId)
     if user:
         passwordHash = hashlib.sha256(
-            str(password + user.salt).encode('utf-8')).hexdigest()
+            str(newPassword + user.salt).encode('utf-8')).hexdigest()
         if core.user.editUser(userId, properties={'password': passwordHash}, protectProperties=False):
             # Return updated user
             user = core.user.getUser(userId)

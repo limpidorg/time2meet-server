@@ -27,6 +27,8 @@ JSONStandardizerInstance = JSONStandardizer(standardMessages={
     -103: "The password is invalid",
     -104: "Access is denied. An elevated permission is required.",
     -105: "Access is denied.",
+    -106: "The user's email address had already been verified.",
+    -107: "Invalid OTP. The code might have expired, or the current OTP's permission does not match its intended purpose. Please try again.",
     -200: "User does not exist",
     -300: "Planner does not exist"
 })
