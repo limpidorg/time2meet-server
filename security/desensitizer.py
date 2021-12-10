@@ -36,7 +36,7 @@ def desensitizeTokenInfo(tokenInfoDict: dict, desensitizeFor: str = 'user') -> d
     }
     protectedProperties = protectedPropertiesLists.get(desensitizeFor, [])
     # Remove useless _id
-    del tokenInfoDict['_id']
+    # There is no _id for an embedded document
     # Desensitize the tokenInfo object
     for protectedProperty in protectedProperties:
         if protectedProperty in tokenInfoDict:

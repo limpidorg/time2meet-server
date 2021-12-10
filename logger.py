@@ -9,8 +9,7 @@ from RequestMap.Response.JSON import JSONStandardizer
 
 init()
 
-DISCORD_WEBHOOK_URL = ''
-ERROR_HOOK = ''
+DISCORD_WEBHOOK_URLS = {}
 
 def push_msg(messageType, *args, **kw):
     types = {
@@ -24,7 +23,7 @@ def push_msg(messageType, *args, **kw):
     print(types.get(messageType, ''), time.time(),
           '\t', *args, Style.RESET_ALL, **kw)
     # Pushes to Discord
-    if DISCORD_WEBHOOK_URL:
+    if DISCORD_WEBHOOK_URLS:
         threading.Thread(
             target=send_discord_msg,
             args=(messageType, *args),
@@ -41,10 +40,10 @@ def send_discord_msg(messageType, *args, **kw):
         'fatal': 0xFF0000,
         'warning': 0xFFFF00
     }
-    HOOK = DISCORD_WEBHOOK_URL
-    if messageType in ['error', 'fatal']:
-        if ERROR_HOOK:
-            HOOK = ERROR_HOOK
+    HOOK = DISCORD_WEBHOOK_URLS.get(messageType, DISCORD_WEBHOOK_URLS.get('default', None))
+    if not HOOK:
+        warning('No Discord Webhook URL found.')
+        return
 
     r = requests.post(HOOK,
                       data=json.dumps({
@@ -103,11 +102,7 @@ class JSONStandardizerWithLogs(JSONStandardizer):
 
 with open('secrets.json', 'r') as f:
     secrets = json.load(f)
-    if 'webhook' in secrets:
-        DISCORD_WEBHOOK_URL = secrets['webhook']
+    if 'webhooks' in secrets:
+        DISCORD_WEBHOOK_URLS = secrets['webhooks']
     else:
         warning('No webhook found in secrets.json')
-    if 'errorhook' in secrets:
-        ERROR_HOOK = secrets['errorhook']
-    else:
-        warning('No errorhook found in secrets.json')
