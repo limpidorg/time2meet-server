@@ -57,7 +57,8 @@ def editUser(userId: str, properties: dict, protectProperties=True):
             core.auth.sendEmailOTP(userId, permission='verify-email')
         logger.info('User updated: ' + userId)
         return True
-    except:
+    except Exception as e:
+        logger.error('Could not update user:',e)
         return False
 
 

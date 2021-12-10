@@ -40,21 +40,21 @@ def send_discord_msg(messageType, *args, **kw):
         'fatal': 0xFF0000,
         'warning': 0xFFFF00
     }
-    
-    r=requests.post(DISCORD_WEBHOOK_URL,
-                  data=json.dumps({
-                      'content': '',
-                      'username': 'T2M Logs',
-                      'embeds': [{
-                          'title': messageType,
-                          'description': 'Timestamp:' + str(time.time()),
-                          'fields': [{
+
+    r = requests.post(DISCORD_WEBHOOK_URL,
+                      data=json.dumps({
+                          'content': '',
+                          'username': 'T2M Logs',
+                          'embeds': [{
+                              'title': messageType,
+                              'description': 'Timestamp:' + str(time.time()),
+                              'fields': [{
                                   'name': 'Message',
-                                  'value': ' '.join(args)
-                          }],
-                          'color': discord_colors.get(messageType, 0x000000)
-                      }]
-                  }), headers={'Content-Type': 'application/json'})
+                                  'value': ' '.join(list(map(lambda x: str(x), args)))
+                              }],
+                              'color': discord_colors.get(messageType, 0x000000)
+                          }]
+                      }), headers={'Content-Type': 'application/json'})
 
 
 def log(*args):
