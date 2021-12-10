@@ -42,7 +42,6 @@ def send_discord_msg(messageType, *args, **kw):
     }
     HOOK = DISCORD_WEBHOOK_URLS.get(messageType, DISCORD_WEBHOOK_URLS.get('default', None))
     if not HOOK:
-        warning('No Discord Webhook URL found.')
         return
 
     r = requests.post(HOOK,
