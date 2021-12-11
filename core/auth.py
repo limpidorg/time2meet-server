@@ -188,7 +188,7 @@ def getTokenInfo(userId, token) -> dict:
 def deleteToken(userId, token):
     user = core.user.getUser(userId)
     if user:
-        _cleanExpiredTokens(userId)
+        _cleanExpiredTokens(user)
         for t in user.tokens:
             if t.token == token:
                 user.tokens.remove(t)
