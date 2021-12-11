@@ -6,7 +6,7 @@ import json
 import security.desensitizer
 
 
-@API.endpoint('new-planner', {
+@API.endpoint('create-planner', {
     'httpmethods': ['POST'],
     'httproute': '/planner',
     'authlevel': 'verify-token'
