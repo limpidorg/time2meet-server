@@ -55,8 +55,12 @@ app = FlaskProtocolInstance.app
 
 logger.info("RequestMap initialised. Connecting to db...")
 
+import json
 try:
-    connect('time2meet')
+    with open("secrets.json", "r") as f:
+        secrets = json.load(f)
+        assert 'dbURL' in secrets
+        connect(host=secrets['dbURL'])
 except Exception as e:
     logger.fatal("Could not connect to db: " + str(e))
     raise
